@@ -89,19 +89,25 @@ svg{display:block}
 .tag.dark{background:#0b0b0c;color:#fff}
 .fav{position:absolute;right:8px;top:8px;z-index:2;width:36px;height:36px;border-radius:50%;border:0;display:grid;place-items:center;background:rgba(255,255,255,.88);color:#0b0b0c;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
 .fav.on{color:var(--hot)}
+.more{padding:18px 16px 0;text-align:center}
 .empty{margin:40px 16px;padding:34px 20px;text-align:center;color:var(--muted)}
 .empty .ring{width:72px;height:72px;margin:0 auto 14px;border-radius:50%;background:var(--chip);display:grid;place-items:center;color:var(--muted)}
 .empty h3{margin:0 0 6px;color:var(--ink);font-size:18px}
 .empty p{margin:0 0 18px}
 .foot{margin:30px 16px 0;text-align:center;color:var(--muted);font-size:12px}
 
-/* product art (placeholder tile — replace with `img` in PRODUCTS) */
+/* загрузка */
+.sk{background:var(--surface);border-radius:var(--r);overflow:hidden;box-shadow:var(--shadow)}
+.sk i{display:block;aspect-ratio:1/1;background:linear-gradient(100deg,var(--chip) 30%,var(--line) 50%,var(--chip) 70%);background-size:300% 100%;animation:sh 1.3s linear infinite}
+.sk u{display:block;height:12px;margin:14px 12px 8px;border-radius:6px;width:62%;background:var(--chip)}
+.sk u+u{width:36%;margin-bottom:16px}
+@keyframes sh{from{background-position:100% 0}to{background-position:0 0}}
+
+/* product art (плитка-заглушка; фото из таблицы ложится поверх) */
 .art{position:relative;aspect-ratio:1/1;display:grid;place-items:center;overflow:hidden;color:var(--ink-art,#fff);
   background:radial-gradient(circle at 28% 18%,rgba(255,255,255,.22),transparent 55%),linear-gradient(145deg,var(--c1),var(--c2))}
 .art svg{width:64%;height:auto;filter:drop-shadow(0 8px 14px rgba(0,0,0,.18))}
-.art img{width:100%;height:100%;object-fit:cover}
-.art .ab{position:absolute;left:12px;bottom:11px;font-size:10px;font-weight:850;letter-spacing:.26em;opacity:.7}
-.art.mini .ab{display:none}
+.art img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;background:var(--surface)}
 .art.mini svg{width:72%}
 
 /* sheet */
@@ -120,7 +126,7 @@ svg{display:block}
 .sprice{text-align:right;flex:none}
 .sprice b{display:block;font-size:21px;font-weight:850}
 .sprice s{color:var(--muted);font-size:13px}
-.desc{margin:12px 0 0;color:var(--muted)}
+.desc{margin:12px 0 0;color:var(--muted);white-space:pre-line}
 .lbl{display:flex;justify-content:space-between;align-items:center;margin:20px 0 10px;font-size:13px;font-weight:750;letter-spacing:.02em}
 .lbl span{color:var(--muted);font-weight:600}
 .lbl a{color:var(--ink);font-weight:700;text-decoration:underline;text-underline-offset:3px;background:none;border:0;padding:0}
@@ -129,7 +135,7 @@ svg{display:block}
 .size.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
 .shake{animation:shake .35s}
 @keyframes shake{20%,60%{transform:translateX(-5px)}40%,80%{transform:translateX(5px)}}
-.colors{display:flex;gap:12px}
+.colors{display:flex;gap:12px;flex-wrap:wrap}
 .col{width:38px;height:38px;border-radius:50%;border:0;box-shadow:inset 0 0 0 1px rgba(128,128,128,.35);position:relative}
 .col.on::after{content:"";position:absolute;inset:-5px;border-radius:50%;border:2px solid var(--ink)}
 .sact{display:flex;gap:10px;margin-top:22px}
@@ -205,35 +211,189 @@ svg{display:block}
     whatsapp: '77002284560',                          // номер для заказов, без «+»
     currency: '₸',
     tryOnUrl: 'https://zhenis875.github.io/Limpopo-sport/', // 3D-примерочная
-    heroTitle: 'Экипировка для тех, кто в движении',
-    heroText: 'Обувь, одежда и инвентарь для тренировок и города.'
+    heroTitle: 'Скидки на экипировку и обувь',
+    heroText: 'Товары известных брендов по сниженным ценам.',
+    // Ссылка на опубликованную Google Таблицу (формат CSV).
+    // Пока пусто — показывается демо-каталог ниже.
+    sheetUrl: '',
+    pageSize: 24                                       // сколько товаров показывать за раз
   };
 
-  var CATS = [
-    ['all', 'Все'], ['shoes', 'Обувь'], ['clothes', 'Одежда'], ['acc', 'Аксессуары'], ['gear', 'Инвентарь']
-  ];
-
-  /* Товары-заглушки. Чтобы поставить реальное фото, добавьте поле img: 'https://.../photo.jpg'
-     tone — цвета плитки, ink — цвет значка, sizes: [] — если размеров нет */
-  var CL = { blk: ['Чёрный', '#0b0b0c'], wht: ['Белый', '#f2f2f0'], gry: ['Графит', '#2a2c30'], lime: ['Лайм', '#c8ff2e'], blue: ['Синий', '#1f4bff'], khaki: ['Хаки', '#5b6b4a'], red: ['Красный', '#ff3b30'] };
-  var SH = ['39', '40', '41', '42', '43', '44', '45'];
-  var CLO = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
-
-  var PRODUCTS = [
-    { id: 1, cat: 'shoes', name: 'Кроссовки Aero Run', brand: 'AERO', price: 42900, old: 54900, glyph: 'shoe', tone: ['#15171a', '#3a3d44'], sizes: SH, colors: [CL.blk, CL.wht, CL.lime], desc: 'Лёгкие беговые кроссовки с амортизацией и дышащим верхом. Для асфальта, дорожки и ежедневных тренировок.' },
-    { id: 2, cat: 'shoes', name: 'Кроссовки Court Pro', brand: 'COURT', price: 38500, isNew: true, glyph: 'shoe', tone: ['#ff4d2e', '#ff8a3d'], sizes: SH, colors: [CL.wht, CL.blk], desc: 'Универсальная пара для зала и города. Устойчивая подошва и мягкая посадка по ноге.' },
-    { id: 3, cat: 'shoes', name: 'Кроссовки Trail Grip', brand: 'TRAIL', price: 51900, glyph: 'shoe', tone: ['#16241c', '#3f6b50'], sizes: SH, colors: [CL.gry, CL.khaki], desc: 'Протектор с глубоким рисунком для грунта и мокрых троп. Усиленный носок и пятка.' },
-    { id: 4, cat: 'clothes', name: 'Худи Core Fleece', brand: 'CORE', price: 24900, isNew: true, glyph: 'jacket', tone: ['#2a2c30', '#4a4d55'], sizes: CLO, colors: [CL.gry, CL.blk, CL.wht], desc: 'Плотный футер с мягким начёсом. Свободный крой — для тренировок и повседневной носки.' },
-    { id: 5, cat: 'clothes', name: 'Футболка Dry Fit', brand: 'CORE', price: 9900, glyph: 'tee', tone: ['#1f3bff', '#6a8bff'], sizes: CLO, colors: [CL.blue, CL.blk, CL.wht], desc: 'Быстросохнущая ткань отводит влагу. Плоские швы не натирают при движении.' },
-    { id: 6, cat: 'clothes', name: 'Куртка Storm Shell', brand: 'STORM', price: 46500, old: 58000, glyph: 'jacket', tone: ['#0b0b0c', '#2e3036'], sizes: CLO, colors: [CL.blk, CL.khaki], desc: 'Ветро- и влагозащитная куртка с проклеенными швами и регулируемым капюшоном.' },
-    { id: 7, cat: 'clothes', name: 'Шорты Flex 7"', brand: 'CORE', price: 12900, glyph: 'shorts', tone: ['#c8ff2e', '#9be000'], ink: '#0b0b0c', sizes: CLO, colors: [CL.blk, CL.gry], desc: 'Лёгкие шорты на эластичном поясе с карманом на молнии. Не стесняют движений.' },
-    { id: 8, cat: 'clothes', name: 'Леггинсы Sculpt', brand: 'FLOW', price: 17900, isNew: true, glyph: 'shorts', tone: ['#7a2cff', '#ff2d92'], sizes: CLO, colors: [CL.blk, CL.gry], desc: 'Эластичные леггинсы с высокой посадкой. Плотная ткань не просвечивает.' },
-    { id: 9, cat: 'acc', name: 'Рюкзак Urban 25 л', brand: 'URBAN', price: 19900, glyph: 'backpack', tone: ['#26282c', '#555962'], sizes: [], colors: [CL.blk, CL.gry], desc: 'Городской рюкзак с отделением для ноутбука и влагозащитным дном.' },
-    { id: 10, cat: 'acc', name: 'Бутылка Steel 750 мл', brand: 'FLOW', price: 6500, glyph: 'bottle', tone: ['#0f6bff', '#58c3ff'], sizes: [], colors: [CL.blk, CL.wht, CL.lime], desc: 'Стальная бутылка с двойными стенками. Держит холод до суток.' },
-    { id: 11, cat: 'acc', name: 'Кепка Run Cap', brand: 'AERO', price: 5900, glyph: 'cap', tone: ['#ff3b30', '#ff7a45'], sizes: [], colors: [CL.blk, CL.wht, CL.red], desc: 'Лёгкая кепка из дышащей ткани с регулировкой по размеру.' },
-    { id: 12, cat: 'gear', name: 'Мяч Match Ball 5', brand: 'COURT', price: 12400, glyph: 'ball', tone: ['#1b1d21', '#3f434b'], sizes: [], colors: [CL.wht], desc: 'Футбольный мяч размера 5 с термосклеенными панелями. Для матчей и тренировок.' },
-    { id: 13, cat: 'gear', name: 'Гантели Neo 2×5 кг', brand: 'IRON', price: 14900, glyph: 'dumbbell', tone: ['#2a2c30', '#0b0b0c'], sizes: [], colors: [CL.blk], desc: 'Пара гантелей с неопреновым покрытием. Не скользят в руках и не катятся.' }
-  ];
+  /* ============================================================
+     ДЕМО-КАТАЛОГ (показывается, пока не подключена таблица)
+     ============================================================ */
+  var DEMO = [
+ {
+  "id": "125WOT-3021",
+  "cat": "Обувь",
+  "name": "Сланцы Rip Curl Floral",
+  "brand": "Rip Curl",
+  "price": 4900,
+  "old": 7900,
+  "desc": "",
+  "img": ""
+ },
+ {
+  "id": "0325PM0G-G0-41",
+  "cat": "Обувь",
+  "name": "Ботинки Zamberlan Cornell Lite GTX",
+  "brand": "Zamberlan",
+  "price": 87900,
+  "old": 109900,
+  "desc": "Ботинки для хайкинга, лёгкого треккинга и повседневного использования в городе. Замшевый верх с водоотталкивающей обработкой Hydrobloc® и кожаная подкладка помогают защитить от влаги. Мембрана GORE-TEX ExtendedComfort обеспечивает водонепроницаемость и отвод влаги. Подошва Vibram® Fuga с компаундом Megagrip® обеспечивает сцепление на влажных поверхностях; промежуточная подошва EVA смягчает шаг.",
+  "img": "https://limpopo.kz/image/cache//catalog/d_o_p/easyphoto/49895/325-1-1000x1000.jpg"
+ },
+ {
+  "id": "0325PM0G-B0-40",
+  "cat": "Обувь",
+  "name": "Ботинки Zamberlan Cornell Lite GTX",
+  "brand": "Zamberlan",
+  "price": 87900,
+  "old": 109900,
+  "desc": "Ботинки для хайкинга, лёгкого треккинга и повседневного использования в городе. Замшевый верх с водоотталкивающей обработкой Hydrobloc® и кожаная подкладка помогают защитить от влаги. Мембрана GORE-TEX ExtendedComfort обеспечивает водонепроницаемость и отвод влаги. Подошва Vibram® Fuga с компаундом Megagrip® обеспечивает сцепление на влажных поверхностях; промежуточная подошва EVA смягчает шаг.",
+  "img": "https://limpopo.kz/image/cache//catalog/d_o_p/easyphoto/384236/0325pm0g-b0-40-2-1000x1000.jpg"
+ },
+ {
+  "id": "4036172-2845",
+  "cat": "Обувь",
+  "name": "Ботинки детские Jack Wolfskin Polar Wolf Texapore Mid",
+  "brand": "Jack Wolfskin",
+  "price": 36900,
+  "old": 45900,
+  "desc": "",
+  "img": ""
+ },
+ {
+  "id": "L41737000",
+  "cat": "Обувь",
+  "name": "Ботинки для треккинга женские Salomon Predict Hike Mid GTX",
+  "brand": "Salomon",
+  "price": 42900,
+  "old": 86900,
+  "desc": "Мягкие женские ботинки для походов, которые адаптируются к походке и рельефу. Подошва Contagrip® MA подходит для влажных, сухих, твёрдых и рыхлых поверхностей. Технология Anatomical Decoupling помогает смягчать шаг и делать перекат плавнее. Пена на основе EVA и Olefin обеспечивает амортизацию и возврат энергии. Мембрана GORE-TEX защищает от влаги, а стелька OrthoLite® добавляет комфорт и воздухопроницаемость.",
+  "img": "https://limpopo.kz/image/cache//catalog/d_o_p/easyphoto/320697/417370-3-1000x1000.jpg"
+ },
+ {
+  "id": "000973",
+  "cat": "Обувь",
+  "name": "Кроссовки беговые женские Inov Parkclaw 280",
+  "brand": "Inov8",
+  "price": 27900,
+  "old": 39900,
+  "desc": "Женские кроссовки для бега по пересечённой местности и смешанным покрытиям. Подошва G-GRIP с графеном и 98 шипами высотой 4 мм обеспечивает сцепление на грунте и плавность движения на дороге. Межподошва G-FLY с перепадом 8 мм даёт амортизацию и повышенный возврат энергии. Дышащий сетчатый верх и упругая стелька BOOMERANG добавляют комфорт.",
+  "img": "https://limpopo.kz/image/cache//catalog/d_o_p/easyphoto/329148/000973-3-1000x1000.jpg"
+ },
+ {
+  "id": "001078",
+  "cat": "Обувь",
+  "name": "Кроссовки беговые женские Inov Trailfly 280",
+  "brand": "Inov8",
+  "price": 27900,
+  "old": 39900,
+  "desc": "Женские трейловые кроссовки для длительных и более динамичных пробежек. Просторная колодка и бесшовный трикотажный верх помогают уменьшить трение, сохраняя вентиляцию и гибкость. Амортизирующий слой толщиной 22 мм с перепадом 8 мм обеспечивает комфорт на длинных дистанциях, а пена FLYSPEED отличается малым весом и высокой отдачей энергии.",
+  "img": "https://limpopo.kz/image/cache//catalog/d_o_p/easyphoto/329157/001078-3-1000x1000.jpg"
+ },
+ {
+  "id": "W011622B",
+  "cat": "Обувь",
+  "name": "Кроссовки беговые женские Newton Fate",
+  "brand": "Newton",
+  "price": 19900,
+  "old": 29900,
+  "desc": "Newton Fate 8 — амортизирующие женские кроссовки для повседневных пробежек, в том числе для начинающих бегунов. Модель изготовлена с использованием переработанных материалов. Технология Action/Reaction Technology использует выступы на подошве, которые сжимаются и возвращают энергию при каждом шаге, помогая смягчать удар и делать отталкивание более отзывчивым.",
+  "img": "https://limpopo.kz/image/cache//catalog/d_o_p/easyphoto/328371/w011622b-4-1000x1000.jpg"
+ },
+ {
+  "id": "W000223",
+  "cat": "Обувь",
+  "name": "Кроссовки беговые женские Newton Gravity",
+  "brand": "Newton",
+  "price": 19900,
+  "old": 29900,
+  "desc": "Женские беговые кроссовки Newton Gravity 12. Межподошва из пеноматериалов NRG™ и Hytrel® сочетает амортизацию и возврат энергии. Дышащий бесшовный сетчатый верх повторяет анатомическую форму стопы. Стелька из пены Hytrel® повышает мягкость и отзывчивость, а система XPS+ помогает эффективнее возвращать энергию при отталкивании.",
+  "img": "https://limpopo.kz/image/cache//catalog/d_o_p/easyphoto/328376/w000223-3-1000x1000.jpg"
+ },
+ {
+  "id": "W000423",
+  "cat": "Обувь",
+  "name": "Кроссовки беговые женские Newton Motion",
+  "brand": "Newton",
+  "price": 19900,
+  "old": 29900,
+  "desc": "",
+  "img": ""
+ },
+ {
+  "id": "1A630-50",
+  "cat": "Плавание",
+  "name": "Гидрокостюм мужской для открытой воды Arena",
+  "brand": "Arena",
+  "price": 79900,
+  "old": 133900,
+  "desc": "Мужской гидрокостюм TRIWETSUIT для триатлона и соревнований на открытой воде. Эластичный неопрен обеспечивает компрессию, а более тонкий и гибкий неопрен в области плеч и рук помогает сохранить свободу движений. Обратная молния облегчает быстрое надевание и снятие. Состав: 85% неопрен, 15% нейлон.",
+  "img": "https://limpopo.kz/image/cache//catalog/d_o_p/produsts/Arena/1A630%201-560x560h.jpg"
+ },
+ {
+  "id": "1B277-19",
+  "cat": "Плавание",
+  "name": "Купальник женский пляжный Arena Heliconia",
+  "brand": "Arena",
+  "price": 4900,
+  "old": 19900,
+  "desc": "Женский пляжный купальник Arena Heliconia для отдыха, купания и загара. Модель обеспечивает свободу движений и комфорт. Плавки имеют надёжную набедренную фиксацию, а верх с чашками поддерживает грудь во время отдыха и плавания.",
+  "img": "https://limpopo.kz/image/cache//catalog/d_o_p/easyphoto/53862/1b277-2-750x750.jpg"
+ },
+ {
+  "id": "1A631-50",
+  "cat": "Плавание",
+  "name": "Гидрокостюм женский для открытой воды Arena",
+  "brand": "Arena",
+  "price": 59900,
+  "old": 105900,
+  "desc": "Женский гидрокостюм Arena Triathlon для плавания на открытой воде. Уплотнённые неопреновые панели на груди и спине добавляют плавучесть. Реверсивная молния помогает быстро снять костюм, полиуретановое покрытие делает его конструкцию более обтекаемой, а жёсткий воротник защищает от попадания воды. Толщина неопрена — от 1,5 до 4 мм. Состав: 95% неопрен, 5% полиамид.",
+  "img": "https://limpopo.kz/image/cache//catalog/d_o_p/produsts/Arena/1A631%201-560x560h.jpg"
+ },
+ {
+  "id": "260 PM",
+  "cat": "Одежда",
+  "name": "Термобельё костюм мужской Манарага",
+  "brand": "Манарага",
+  "price": 22900,
+  "old": 32900,
+  "desc": "Мужской комплект тонкого тёплого термобелья для использования в качестве нижнего слоя в холодную погоду. Плотный эластичный трикотаж из полиэстера тянется в четырёх направлениях, имеет мягкий ворс внутри и гладкую прочную поверхность снаружи. Анатомический крой и эластичность обеспечивают посадку по фигуре и не ограничивают движения.",
+  "img": "https://limpopo.kz/image/cache//catalog/d_o_p/easyphoto/51694/260-pm-1-1000x1000.jpg"
+ },
+ {
+  "id": "KK 44151w",
+  "cat": "Зимнее снаряжение",
+  "name": "Коньки фигурные Botas Dagmar",
+  "brand": "Botas",
+  "price": 49100,
+  "old": 57900,
+  "desc": "",
+  "img": ""
+ },
+ {
+  "id": "TSUTRIW-17-990",
+  "cat": "Одежда",
+  "name": "Костюм для триатлона женский Compressport TR3 Aero Trisuit SS",
+  "brand": "Compressport",
+  "price": 52900,
+  "old": 65900,
+  "desc": "",
+  "img": ""
+ },
+ {
+  "id": "TSUTRIW-990",
+  "cat": "Одежда",
+  "name": "Костюм для триатлона женский Compressport TR3 Aero Trisuit",
+  "brand": "Compressport",
+  "price": 39900,
+  "old": 52900,
+  "desc": "",
+  "img": ""
+ }
+];
 
   /* ============================================================
      ХЕЛПЕРЫ
@@ -244,9 +404,7 @@ svg{display:block}
 
   var $ = function (s) { return document.querySelector(s); };
   var esc = function (s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]; }); };
-  var fmt = function (n) { return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, '\u00A0') + '\u00A0' + CFG.currency; };
-  var byId = function (id) { for (var i = 0; i < PRODUCTS.length; i++) if (PRODUCTS[i].id === id) return PRODUCTS[i]; return null; };
-  var disc = function (p) { return p.old ? Math.round((1 - p.price / p.old) * 100) : 0; };
+  var fmt = function (n) { return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ' ') + ' ' + CFG.currency; };
 
   var store = {
     get: function (k, d) { try { var v = localStorage.getItem('lp_' + k); return v ? JSON.parse(v) : d; } catch (e) { return d; } },
@@ -264,6 +422,123 @@ svg{display:block}
   function openExternal(url) {
     try { if (tg && tg.openLink) { tg.openLink(url); return; } } catch (e) {}
     window.open(url, '_blank', 'noopener');
+  }
+
+  /* ============================================================
+     ТОВАРЫ: нормализация, CSV из Google Таблицы
+     ============================================================ */
+  var COLORMAP = {
+    'чёрный': '#0b0b0c', 'черный': '#0b0b0c', 'белый': '#f2f2f0', 'серый': '#8a8d93', 'графит': '#2a2c30',
+    'лайм': '#c8ff2e', 'синий': '#1f4bff', 'голубой': '#58c3ff', 'красный': '#ff3b30', 'зелёный': '#1fa855',
+    'зеленый': '#1fa855', 'хаки': '#5b6b4a', 'жёлтый': '#ffd60a', 'желтый': '#ffd60a', 'оранжевый': '#ff8a3d',
+    'розовый': '#ff6fa8', 'фиолетовый': '#7a2cff', 'бежевый': '#d8c3a5', 'коричневый': '#7a5230',
+    'бордовый': '#7a1f2b', 'тёмно-синий': '#14213d', 'темно-синий': '#14213d', 'мультиколор': '#ff9500'
+  };
+  var TONES = [
+    ['#15171a', '#3a3d44'], ['#ff4d2e', '#ff8a3d'], ['#1f3bff', '#6a8bff'], ['#16241c', '#3f6b50'],
+    ['#2a2c30', '#4a4d55'], ['#7a2cff', '#ff2d92'], ['#0f6bff', '#58c3ff'], ['#c8ff2e', '#9be000', '#0b0b0c'], ['#ff3b30', '#ff7a45']
+  ];
+
+  function hash(s) { var h = 0; s = String(s); for (var i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) >>> 0; return h; }
+  function slug(s) { return String(s).toLowerCase().replace(/[^a-zа-яё0-9]+/g, '-').replace(/^-+|-+$/g, ''); }
+  function num(v) { var n = parseFloat(String(v == null ? '' : v).replace(/[^\d.,]/g, '').replace(',', '.')); return isFinite(n) ? Math.round(n) : 0; }
+  function listOf(v) { if (Array.isArray(v)) return v; return String(v == null ? '' : v).split(/[,;]+/).map(function (x) { return x.trim(); }).filter(Boolean); }
+  function yes(v) { return /^(да|yes|y|1|true|\+|new|новинка)$/i.test(String(v == null ? '' : v).trim()); }
+  function no(v) { return /^(нет|no|n|0|false|-|нет в наличии)$/i.test(String(v == null ? '' : v).trim()); }
+  function colorsOf(v) {
+    return listOf(v).map(function (t) {
+      var m = t.split(':'), n = m[0].trim(), h = (m[1] || '').trim();
+      if (!/^#[0-9a-f]{3,8}$/i.test(h)) h = COLORMAP[n.toLowerCase()] || '#c9cbd0';
+      return [n, h];
+    });
+  }
+  function guessGlyph(text) {
+    var t = text.toLowerCase();
+    if (/велосип|bike|giant|liv |cannondale|cube |dahon|author|bmx/.test(t)) return 'bike';
+    if (/кроссов|ботин|обув|кед|сапог|бутс|сланц|туфл/.test(t)) return 'shoe';
+    if (/мяч/.test(t)) return 'ball';
+    if (/куртк|худи|толстов|ветровк|жилет|свитшот|олимпийк/.test(t)) return 'jacket';
+    if (/шорт|леггин|штаны|брюк|тайтс|лосин/.test(t)) return 'shorts';
+    if (/футболк|майк|топ|поло|лонгслив|футбол/.test(t)) return 'tee';
+    if (/бутыл|шейкер|термос/.test(t)) return 'bottle';
+    if (/рюкзак|сумк|барсетк/.test(t)) return 'backpack';
+    if (/кепк|шапк|панам|бейсболк/.test(t)) return 'cap';
+    if (/гантел|штанг|гир|эспандер|коврик|скакалк|турник/.test(t)) return 'dumbbell';
+    return 'box';
+  }
+
+  function normalize(r, i, used) {
+    var name = String(r.name || '').trim(), price = num(r.price);
+    if (!name) return null;
+    var id = String(r.id || slug(name) || ('p' + i));
+    while (used[id]) id += '-' + i;
+    used[id] = 1;
+    var cat = String(r.cat || '').trim() || 'Каталог';
+    var t = r.tone || TONES[hash(name) % TONES.length];
+    var old = num(r.old);
+    return {
+      id: id, cat: cat, name: name, brand: String(r.brand || '').trim(),
+      price: price, old: old > price ? old : 0, isNew: !!r.isNew,
+      sizes: listOf(r.sizes), colors: colorsOf(r.colors), desc: String(r.desc || '').trim(),
+      img: String(r.img || '').trim(), glyph: r.glyph || guessGlyph(cat + ' ' + name),
+      tone: [t[0], t[1]], ink: r.ink || t[2] || ''
+    };
+  }
+  function build(rows) { var used = {}, out = []; rows.forEach(function (r, i) { var p = normalize(r, i, used); if (p) out.push(p); }); return out; }
+
+  function parseCSV(text) {
+    var rows = [], row = [], f = '', q = false, c;
+    text = String(text).replace(/^﻿/, '');
+    for (var i = 0; i < text.length; i++) {
+      c = text.charAt(i);
+      if (q) {
+        if (c === '"') { if (text.charAt(i + 1) === '"') { f += '"'; i++; } else q = false; } else f += c;
+      } else if (c === '"') q = true;
+      else if (c === ',') { row.push(f); f = ''; }
+      else if (c === '\n' || c === '\r') { if (c === '\r' && text.charAt(i + 1) === '\n') i++; row.push(f); rows.push(row); row = []; f = ''; }
+      else f += c;
+    }
+    if (f !== '' || row.length) { row.push(f); rows.push(row); }
+    return rows;
+  }
+
+  var HEAD = {
+    cat: ['категория', 'category'], name: ['название', 'название товара', 'наименование', 'товар', 'name'], brand: ['бренд', 'brand'],
+    price: ['цена', 'цена продажи', 'цена продажи (₸)', 'price'], old: ['старая цена', 'старая цена (₸)', 'цена до скидки', 'old price', 'old'],
+    sizes: ['размеры', 'размер', 'sizes'], colors: ['цвета', 'цвет', 'colors'], desc: ['описание', 'description', 'desc'],
+    img: ['фото', 'главное фото (ссылка)', 'картинка', 'photo', 'image', 'img'], isNew: ['новинка', 'new'],
+    stock: ['наличие', 'в наличии', 'статус наличия', 'stock'], show: ['показывать в каталоге', 'show'], id: ['id', 'артикул', 'артикул / sku', 'sku']
+  };
+  function fromCSV(text) {
+    var rows = parseCSV(text);
+    if (rows.length < 2) return [];
+    var head = rows[0].map(function (h) { return String(h).toLowerCase().trim().replace(/[_\s]+/g, ' '); });
+    var idx = {};
+    Object.keys(HEAD).forEach(function (k) { for (var j = 0; j < head.length; j++) if (HEAD[k].indexOf(head[j]) > -1) { idx[k] = j; return; } });
+    var cell = function (r, k) { return idx[k] == null ? '' : (r[idx[k]] || ''); };
+    var raws = [];
+    rows.slice(1).forEach(function (r) {
+      if (no(cell(r, 'stock'))) return;
+      if (idx.show != null && no(cell(r, 'show'))) return;
+      raws.push({
+        cat: cell(r, 'cat'), name: cell(r, 'name'), brand: cell(r, 'brand'), price: cell(r, 'price'), old: cell(r, 'old'),
+        sizes: cell(r, 'sizes'), colors: cell(r, 'colors'), desc: cell(r, 'desc'), img: cell(r, 'img'),
+        isNew: yes(cell(r, 'isNew')), id: cell(r, 'id')
+      });
+    });
+    return build(raws);
+  }
+
+  var PRODUCTS = build(DEMO);
+  var byId = function (id) { id = String(id); for (var i = 0; i < PRODUCTS.length; i++) if (PRODUCTS[i].id === id) return PRODUCTS[i]; return null; };
+  var disc = function (p) { return p.old && p.price ? Math.floor((p.old - p.price) * 100 / p.old + 1e-9) : 0; };
+  var priceOf = function (p) { return p.price ? fmt(p.price) : 'По запросу'; };
+  var hasAsk = function () { return cartItems().some(function (i) { return !byId(i.id).price; }); };
+  function totalStr() { var t = cartTotal(); if (!t) return 'по запросу'; return hasAsk() ? fmt(t) + ' + по запросу' : fmt(t); }
+  function cats() {
+    var seen = {}, out = [['all', 'Все']];
+    PRODUCTS.forEach(function (p) { if (!seen[p.cat]) { seen[p.cat] = 1; out.push([p.cat, p.cat]); } });
+    return out;
   }
 
   /* ============================================================
@@ -295,33 +570,41 @@ svg{display:block}
     ball: '<circle cx="60" cy="45" r="34"/><path d="M60 31l13 9-5 15H52l-5-15z"/><path d="M60 31V11M73 40l20-6M68 55l12 17M52 55L40 72M47 40l-20-6"/>',
     backpack: '<path d="M40 32a20 20 0 0 1 40 0v42a8 8 0 0 1-8 8H48a8 8 0 0 1-8-8z"/><path d="M50 30v-4a10 10 0 0 1 20 0v4"/><rect x="48" y="54" width="24" height="16" rx="4"/><path d="M40 46h40"/>',
     cap: '<path d="M24 54c0-22 15-34 36-34s36 12 36 34z"/><path d="M20 54h84c8 0 12 3 12 8H20z"/><path d="M60 20v34"/>',
-    dumbbell: '<rect x="14" y="34" width="10" height="22" rx="3"/><rect x="26" y="26" width="10" height="38" rx="3"/><path d="M36 45h48"/><rect x="84" y="26" width="10" height="38" rx="3"/><rect x="96" y="34" width="10" height="22" rx="3"/>'
+    dumbbell: '<rect x="14" y="34" width="10" height="22" rx="3"/><rect x="26" y="26" width="10" height="38" rx="3"/><path d="M36 45h48"/><rect x="84" y="26" width="10" height="38" rx="3"/><rect x="96" y="34" width="10" height="22" rx="3"/>',
+    box: '<path d="M20 30l40-16 40 16v40L60 86 20 70z"/><path d="M20 30l40 16 40-16M60 46v40"/>',
+    bike: '<circle cx="30" cy="58" r="20"/><circle cx="90" cy="58" r="20"/><path d="M30 58h25M30 58l17-26M47 32l8 26M47 32h31M78 32L55 58M78 32l12 26M78 32l-2-8h8M42 28h10M47 32v-4"/>'
   };
 
   function art(p, mini) {
-    var inner = p.img
-      ? '<img src="' + esc(p.img) + '" alt="' + esc(p.name) + '" loading="lazy">'
-      : '<svg viewBox="0 0 120 90" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + GLYPH[p.glyph] + '</svg>';
-    return '<div class="art' + (mini ? ' mini' : '') + '" style="--c1:' + p.tone[0] + ';--c2:' + p.tone[1] + ';--ink-art:' + (p.ink || '#fff') + '">' + inner + '</div>';
+    var img = p.img ? '<img src="' + esc(p.img) + '" alt="' + esc(p.name) + '" loading="lazy" referrerpolicy="no-referrer" onerror="this.style.display=\'none\'">' : '';
+    return '<div class="art' + (mini ? ' mini' : '') + '" style="--c1:' + p.tone[0] + ';--c2:' + p.tone[1] + ';--ink-art:' + (p.ink || '#fff') + '">' +
+      '<svg viewBox="0 0 120 90" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + (GLYPH[p.glyph] || GLYPH.box) + '</svg>' + img + '</div>';
   }
 
   /* ============================================================
      СОСТОЯНИЕ
      ============================================================ */
   var S = {
-    view: 'home', cat: 'all', sort: 'pop', q: '', sheet: null,
-    cart: (store.get('cart', []) || []).filter(function (i) { return byId(i.id); }),
-    favs: (store.get('favs', []) || []).filter(byId),
+    view: 'home', cat: 'all', sort: 'pop', q: '', sheet: null, shown: CFG.pageSize, loading: false, error: false,
+    cart: store.get('cart', []) || [],
+    favs: (store.get('favs', []) || []).map(String),
     form: store.get('form', { name: '', phone: '', comment: '', delivery: 'pickup' })
   };
   var saveCart = function () { store.set('cart', S.cart); };
   var saveFavs = function () { store.set('favs', S.favs); };
   var saveForm = function () { store.set('form', S.form); };
 
-  var cartCount = function () { return S.cart.reduce(function (a, i) { return a + i.qty; }, 0); };
-  var cartTotal = function () { return S.cart.reduce(function (a, i) { return a + byId(i.id).price * i.qty; }, 0); };
-  var isFav = function (id) { return S.favs.indexOf(id) > -1; };
+  function cartItems() { return S.cart.filter(function (i) { return byId(i.id); }); }
+  var cartCount = function () { return cartItems().reduce(function (a, i) { return a + i.qty; }, 0); };
+  var cartTotal = function () { return cartItems().reduce(function (a, i) { return a + byId(i.id).price * i.qty; }, 0); };
+  var isFav = function (id) { return S.favs.indexOf(String(id)) > -1; };
   var lineKey = function (i) { return i.id + '|' + (i.size || '') + '|' + (i.color || ''); };
+
+  function sanitize() {
+    S.cart = S.cart.filter(function (i) { return byId(i.id); });
+    S.favs = S.favs.filter(byId);
+    saveCart(); saveFavs();
+  }
 
   /* ============================================================
      РЕНДЕР
@@ -329,40 +612,52 @@ svg{display:block}
   function list() {
     var q = S.q.trim().toLowerCase();
     var a = PRODUCTS.filter(function (p) {
-      return (S.cat === 'all' || p.cat === S.cat) && (!q || (p.name + ' ' + p.brand).toLowerCase().indexOf(q) > -1);
+      return (S.cat === 'all' || p.cat === S.cat) && (!q || (p.name + ' ' + p.brand + ' ' + p.cat).toLowerCase().indexOf(q) > -1);
     });
     if (S.sort === 'asc') a = a.slice().sort(function (x, y) { return x.price - y.price; });
     if (S.sort === 'desc') a = a.slice().sort(function (x, y) { return y.price - x.price; });
+    if (S.sort === 'disc') a = a.slice().sort(function (x, y) { return disc(y) - disc(x); });
     return a;
   }
 
   function cardHTML(p, i) {
     var d = disc(p);
     var tag = d ? '<span class="tag">−' + d + '%</span>' : (p.isNew ? '<span class="tag dark">Новинка</span>' : '');
-    return '<div class="card" data-a="open" data-id="' + p.id + '" style="animation-delay:' + Math.min(i, 8) * 40 + 'ms">' + tag +
-      '<button class="fav' + (isFav(p.id) ? ' on' : '') + '" data-a="fav" data-id="' + p.id + '" aria-label="В избранное">' + ic('heart', 18, isFav(p.id)) + '</button>' +
+    return '<div class="card" data-a="open" data-id="' + esc(p.id) + '" style="animation-delay:' + Math.min(i || 0, 8) * 40 + 'ms">' + tag +
+      '<button class="fav' + (isFav(p.id) ? ' on' : '') + '" data-a="fav" data-id="' + esc(p.id) + '" aria-label="В избранное">' + ic('heart', 18, isFav(p.id)) + '</button>' +
       art(p) +
-      '<div class="card-body"><div class="brand">' + esc(p.brand) + '</div><div class="name">' + esc(p.name) + '</div>' +
-      '<div class="price"><b>' + fmt(p.price) + '</b>' + (p.old ? '<s>' + fmt(p.old) + '</s>' : '') + '</div></div></div>';
+      '<div class="card-body"><div class="brand">' + esc(p.brand || p.cat) + '</div><div class="name">' + esc(p.name) + '</div>' +
+      '<div class="price"><b>' + priceOf(p) + '</b>' + (p.old ? '<s>' + fmt(p.old) + '</s>' : '') + '</div></div></div>';
   }
 
   function chipsHTML() {
-    return CATS.map(function (c) { return '<button class="chip' + (S.cat === c[0] ? ' on' : '') + '" data-a="cat" data-v="' + c[0] + '">' + c[1] + '</button>'; }).join('');
+    return cats().map(function (c) { return '<button class="chip' + (S.cat === c[0] ? ' on' : '') + '" data-a="cat" data-v="' + esc(c[0]) + '">' + esc(c[1]) + '</button>'; }).join('');
   }
 
+  function skeletons() { var s = ''; for (var i = 0; i < 6; i++) s += '<div class="sk"><i></i><u></u><u></u></div>'; return s; }
   function gridHTML() {
-    var a = list();
-    if (!a.length) return '';
-    return a.map(cardHTML).join('');
+    if (S.loading) return skeletons();
+    return list().slice(0, S.shown).map(cardHTML).join('');
+  }
+  function isEmpty() { return !S.loading && !list().length; }
+  function emptyInner() {
+    return S.error
+      ? '<div class="ring">' + ic('close', 30) + '</div><h3>Каталог не загрузился</h3><p>Проверьте интернет и попробуйте ещё раз</p><button class="btn sm" data-a="reload">Повторить</button>'
+      : '<div class="ring">' + ic('search', 30) + '</div><h3>Ничего не найдено</h3><p>Попробуйте изменить запрос или категорию</p>';
+  }
+  function moreHTML() {
+    var n = list().length - S.shown;
+    return (!S.loading && n > 0) ? '<button class="btn ghost sm" data-a="more">Показать ещё · ' + n + '</button>' : '';
   }
 
   function renderCatalogParts() {
-    var chips = $('#chips'), grid = $('#grid'), empty = $('#empty');
-    if (!chips || !grid) return;
-    chips.innerHTML = chipsHTML();
-    var a = list();
+    var grid = $('#grid'); if (!grid) return;
+    $('#chips').innerHTML = chipsHTML();
     grid.innerHTML = gridHTML();
-    empty.style.display = a.length ? 'none' : 'block';
+    var em = $('#empty');
+    em.style.display = isEmpty() ? 'block' : 'none';
+    if (isEmpty()) em.innerHTML = emptyInner();
+    $('#more').innerHTML = moreHTML();
   }
 
   function viewHome() {
@@ -375,10 +670,12 @@ svg{display:block}
       '<div class="sec" id="catalog"><h2>Каталог</h2><select class="sort" id="sort" aria-label="Сортировка">' +
       '<option value="pop"' + (S.sort === 'pop' ? ' selected' : '') + '>Популярные</option>' +
       '<option value="asc"' + (S.sort === 'asc' ? ' selected' : '') + '>Дешевле</option>' +
-      '<option value="desc"' + (S.sort === 'desc' ? ' selected' : '') + '>Дороже</option></select></div>' +
+      '<option value="desc"' + (S.sort === 'desc' ? ' selected' : '') + '>Дороже</option>' +
+      '<option value="disc"' + (S.sort === 'disc' ? ' selected' : '') + '>Больше скидка</option></select></div>' +
       '<div class="chips" id="chips">' + chipsHTML() + '</div>' +
       '<div class="grid" id="grid">' + gridHTML() + '</div>' +
-      '<div class="empty" id="empty" style="display:' + (list().length ? 'none' : 'block') + '"><div class="ring">' + ic('search', 30) + '</div><h3>Ничего не найдено</h3><p>Попробуйте изменить запрос или категорию</p></div>' +
+      '<div class="more" id="more">' + moreHTML() + '</div>' +
+      '<div class="empty" id="empty" style="display:' + (isEmpty() ? 'block' : 'none') + '">' + (isEmpty() ? emptyInner() : '') + '</div>' +
       '<div class="foot">' + esc(CFG.name) + ' · заказ оформляется через WhatsApp</div>';
   }
 
@@ -392,16 +689,17 @@ svg{display:block}
   }
 
   function viewCart() {
+    var items = cartItems();
     var head = '<div class="page-t"><h2>Корзина</h2><span>' + cartCount() + ' шт.</span></div>';
-    if (!S.cart.length) {
+    if (!items.length) {
       return head + '<div class="empty"><div class="ring">' + ic('bag', 30) + '</div><h3>Корзина пуста</h3><p>Добавьте товары из каталога — мы соберём заказ</p><button class="btn sm" data-a="tab" data-v="home">В каталог</button></div>';
     }
-    var lines = S.cart.map(function (i) {
+    var lines = items.map(function (i) {
       var p = byId(i.id), k = lineKey(i);
       var meta = [i.size ? 'Размер ' + i.size : '', i.color || ''].filter(Boolean).join(' · ');
-      return '<div class="line">' + art(p, true) + '<div><h4>' + esc(p.name) + '</h4><div class="meta">' + esc(meta || p.brand) + '</div>' +
+      return '<div class="line">' + art(p, true) + '<div><h4>' + esc(p.name) + '</h4><div class="meta">' + esc(meta || p.brand || p.cat) + '</div>' +
         '<div class="bot"><div class="qty"><button data-a="dec" data-k="' + esc(k) + '" aria-label="Меньше">' + ic('minus', 16) + '</button><span>' + i.qty + '</span><button data-a="inc" data-k="' + esc(k) + '" aria-label="Больше">' + ic('plus', 16) + '</button></div>' +
-        '<div class="lp">' + fmt(p.price * i.qty) + '</div></div></div></div>';
+        '<div class="lp">' + (p.price ? fmt(p.price * i.qty) : 'По запросу') + '</div></div></div></div>';
     }).join('');
     var f = S.form;
     return head + lines +
@@ -410,9 +708,9 @@ svg{display:block}
       '<label class="field"><input id="fName" placeholder="Ваше имя" autocomplete="name" value="' + esc(f.name) + '"></label>' +
       '<label class="field"><input id="fPhone" type="tel" inputmode="tel" placeholder="Телефон" autocomplete="tel" value="' + esc(f.phone) + '"></label>' +
       '<label class="field"><textarea id="fComment" rows="2" placeholder="Комментарий к заказу">' + esc(f.comment) + '</textarea></label>' +
-      '<div class="sum"><div><span>Товары (' + cartCount() + ')</span><span>' + fmt(cartTotal()) + '</span></div>' +
+      '<div class="sum"><div><span>Товары (' + cartCount() + ')</span><span>' + totalStr() + '</span></div>' +
       '<div><span>' + (f.delivery === 'delivery' ? 'Доставка' : 'Самовывоз') + '</span><span>' + (f.delivery === 'delivery' ? 'уточнит менеджер' : 'бесплатно') + '</span></div>' +
-      '<div class="t"><span>Итого</span><span>' + fmt(cartTotal()) + '</span></div></div>' +
+      '<div class="t"><span>Итого</span><span>' + totalStr() + '</span></div></div>' +
       '<p class="note">Заказ откроется в WhatsApp с готовым сообщением — менеджер подтвердит наличие и оплату.</p>' +
       (inTG ? '' : '<div class="cta"><button class="btn accent" data-a="checkout">' + ic('chat', 20) + ' Оформить в WhatsApp</button></div>') +
       '<button class="linkbtn" data-a="clear">Очистить корзину</button>';
@@ -449,22 +747,23 @@ svg{display:block}
       : '';
     var colors = p.colors.length > 1
       ? '<div class="lbl">Цвет <span id="colName">' + esc(sel.color) + '</span></div><div class="colors">' +
-        p.colors.map(function (c) { return '<button class="col' + (sel.color === c[0] ? ' on' : '') + '" data-a="color" data-v="' + esc(c[0]) + '" style="background:' + c[1] + '" aria-label="' + esc(c[0]) + '"></button>'; }).join('') + '</div>'
+        p.colors.map(function (c) { return '<button class="col' + (sel.color === c[0] ? ' on' : '') + '" data-a="color" data-v="' + esc(c[0]) + '" style="background:' + esc(c[1]) + '" aria-label="' + esc(c[0]) + '"></button>'; }).join('') + '</div>'
       : '';
     $('#sheet').innerHTML =
       '<div style="position:relative">' + (d ? '<span class="tag" style="left:16px;top:16px">−' + d + '%</span>' : (p.isNew ? '<span class="tag dark" style="left:16px;top:16px">Новинка</span>' : '')) +
       '<button class="sx" data-a="close" aria-label="Закрыть">' + ic('close', 20) + '</button>' + art(p) + '</div>' +
-      '<div class="sbody"><div class="srow"><div><div class="brand">' + esc(p.brand) + '</div><h2>' + esc(p.name) + '</h2></div>' +
-      '<div class="sprice"><b>' + fmt(p.price) + '</b>' + (p.old ? '<s>' + fmt(p.old) + '</s>' : '') + '</div></div>' +
-      '<p class="desc">' + esc(p.desc) + '</p>' + sizes + colors +
-      '<div class="sact"><button class="heart' + (isFav(p.id) ? ' on' : '') + '" data-a="fav" data-id="' + p.id + '" aria-label="В избранное">' + ic('heart', 24, isFav(p.id)) + '</button>' +
-      '<button class="btn" data-a="add">В корзину · ' + fmt(p.price) + '</button></div></div>';
+      '<div class="sbody"><div class="srow"><div><div class="brand">' + esc(p.brand || p.cat) + '</div><h2>' + esc(p.name) + '</h2></div>' +
+      '<div class="sprice"><b>' + priceOf(p) + '</b>' + (p.old ? '<s>' + fmt(p.old) + '</s>' : '') + '</div></div>' +
+      (p.desc ? '<p class="desc">' + esc(p.desc) + '</p>' : '') + sizes + colors +
+      (p.sizes.length ? '' : '<p class="desc" style="font-size:13px">Наличие и размер подтвердит менеджер в WhatsApp.</p>') +
+      '<div class="sact"><button class="heart' + (isFav(p.id) ? ' on' : '') + '" data-a="fav" data-id="' + esc(p.id) + '" aria-label="В избранное">' + ic('heart', 24, isFav(p.id)) + '</button>' +
+      '<button class="btn" data-a="add">В корзину' + (p.price ? ' · ' + fmt(p.price) : '') + '</button></div></div>';
   }
 
   function openSheet(id) {
     var p = byId(id); if (!p) return;
-    sel = { id: id, size: '', color: p.colors.length ? p.colors[0][0] : '' };
-    S.sheet = id;
+    sel = { id: p.id, size: '', color: p.colors.length ? p.colors[0][0] : '' };
+    S.sheet = p.id;
     renderSheet();
     $('#sheet').scrollTop = 0;
     $('#backdrop').classList.add('on');
@@ -485,7 +784,7 @@ svg{display:block}
      ДЕЙСТВИЯ
      ============================================================ */
   function addToCart() {
-    var p = byId(sel.id);
+    var p = byId(sel.id); if (!p) return;
     if (p.sizes.length && !sel.size) {
       var el = $('#sizes'); if (el) { el.classList.remove('shake'); void el.offsetWidth; el.classList.add('shake'); }
       toast('Выберите размер'); haptic('err'); return;
@@ -505,14 +804,15 @@ svg{display:block}
   }
 
   function toggleFav(id) {
+    id = String(id);
     var ix = S.favs.indexOf(id);
     if (ix > -1) S.favs.splice(ix, 1); else S.favs.push(id);
     saveFavs(); haptic();
     // обновить сердечки точечно, без перерисовки страницы
-    document.querySelectorAll('[data-a="fav"][data-id="' + id + '"]').forEach(function (b) {
+    document.querySelectorAll('[data-a="fav"]').forEach(function (b) {
+      if (b.getAttribute('data-id') !== id) return;
       b.classList.toggle('on', isFav(id));
-      var big = b.classList.contains('heart');
-      b.innerHTML = ic('heart', big ? 24 : 18, isFav(id));
+      b.innerHTML = ic('heart', b.classList.contains('heart') ? 24 : 18, isFav(id));
     });
     if (S.view === 'favs' && !S.sheet) render(true);
   }
@@ -520,12 +820,13 @@ svg{display:block}
   function orderText() {
     var f = S.form, L = [];
     L.push('Здравствуйте! Хочу оформить заказ в ' + CFG.name + ':', '');
-    S.cart.forEach(function (i, n) {
+    cartItems().forEach(function (i, n) {
       var p = byId(i.id);
       var m = [i.size ? 'размер ' + i.size : '', i.color || ''].filter(Boolean).join(', ');
-      L.push((n + 1) + '. ' + p.name + (m ? ' (' + m + ')' : '') + ' × ' + i.qty + ' — ' + fmt(p.price * i.qty));
+      L.push((n + 1) + '. ' + p.name + (m ? ' (' + m + ')' : '') + ' × ' + i.qty + ' — ' + (p.price ? fmt(p.price * i.qty) : 'уточните цену'));
     });
-    L.push('', 'Итого: ' + fmt(cartTotal()), 'Получение: ' + (f.delivery === 'delivery' ? 'доставка' : 'самовывоз'));
+    if (hasAsk()) L.push('', 'Прошу уточнить цену и наличие.');
+    L.push('', 'Итого: ' + totalStr(), 'Получение: ' + (f.delivery === 'delivery' ? 'доставка' : 'самовывоз'));
     if (f.name) L.push('Имя: ' + f.name);
     if (f.phone) L.push('Телефон: ' + f.phone);
     if (f.comment) L.push('Комментарий: ' + f.comment);
@@ -534,7 +835,7 @@ svg{display:block}
   }
 
   function checkout() {
-    if (!S.cart.length) { toast('Корзина пуста'); return; }
+    if (!cartItems().length) { toast('Корзина пуста'); return; }
     haptic('ok');
     openExternal('https://wa.me/' + CFG.whatsapp + '?text=' + encodeURIComponent(orderText()));
   }
@@ -545,6 +846,30 @@ svg{display:block}
     S.view = v; render(); haptic();
   }
 
+  /* ---------- загрузка каталога из Google Таблицы ---------- */
+  function loadProducts() {
+    if (!CFG.sheetUrl) return;
+    var cached = store.get('products_v2', null);
+    if (cached && cached.length) { PRODUCTS = cached; }
+    else { PRODUCTS = []; S.loading = true; S.error = false; }
+    var url = CFG.sheetUrl + (CFG.sheetUrl.indexOf('?') > -1 ? '&' : '?') + 't=' + Date.now();
+    fetch(url, { cache: 'no-store' })
+      .then(function (r) { if (!r.ok) throw new Error('http ' + r.status); return r.text(); })
+      .then(function (t) {
+        var items = fromCSV(t);
+        if (!items.length) throw new Error('empty');
+        PRODUCTS = items; store.set('products_v2', items);
+        S.loading = false; S.error = false; finishLoad();
+      })
+      .catch(function () { S.loading = false; S.error = !PRODUCTS.length; finishLoad(); });
+  }
+  function finishLoad() {
+    if (!S.loading && PRODUCTS.length) sanitize();
+    if (S.cat !== 'all' && !cats().some(function (c) { return c[0] === S.cat; })) S.cat = 'all';
+    S.shown = Math.max(S.shown, CFG.pageSize);
+    render(true);
+  }
+
   /* ============================================================
      TELEGRAM: MainButton / BackButton / тема
      ============================================================ */
@@ -552,8 +877,8 @@ svg{display:block}
     if (!inTG) return;
     try {
       var mb = tg.MainButton;
-      if (S.view === 'cart' && S.cart.length && !S.sheet) {
-        mb.setParams({ text: 'Оформить заказ · ' + fmt(cartTotal()).replace(/\u00A0/g, ' '), color: '#c8ff2e', text_color: '#0b0b0c', is_visible: true });
+      if (S.view === 'cart' && cartItems().length && !S.sheet) {
+        mb.setParams({ text: 'Оформить заказ' + (cartTotal() ? ' · ' + fmt(cartTotal()).replace(/ /g, ' ') : ''), color: '#c8ff2e', text_color: '#0b0b0c', is_visible: true });
       } else { mb.hide(); }
       if (S.sheet) tg.BackButton.show(); else tg.BackButton.hide();
     } catch (e) {}
@@ -570,18 +895,23 @@ svg{display:block}
      ============================================================ */
   document.addEventListener('click', function (e) {
     var el = e.target.closest('[data-a]'); if (!el) return;
-    var a = el.getAttribute('data-a'), v = el.getAttribute('data-v'), id = +el.getAttribute('data-id');
+    var a = el.getAttribute('data-a'), v = el.getAttribute('data-v'), id = el.getAttribute('data-id');
     switch (a) {
       case 'open': openSheet(id); break;
       case 'close': closeSheet(); break;
       case 'fav': e.stopPropagation(); toggleFav(id); break;
-      case 'cat': S.cat = v; renderCatalogParts(); haptic(); break;
+      case 'cat': S.cat = v; S.shown = CFG.pageSize; renderCatalogParts(); haptic(); break;
+      case 'more':
+        var all = list(), from = S.shown; S.shown += CFG.pageSize;
+        $('#grid').insertAdjacentHTML('beforeend', all.slice(from, S.shown).map(function (p, i) { return cardHTML(p, i); }).join(''));
+        $('#more').innerHTML = moreHTML(); haptic(); break;
+      case 'reload': S.error = false; loadProducts(); render(true); break;
       case 'tab': goTab(v); break;
       case 'tryon': openExternal(CFG.tryOnUrl); break;
       case 'toCatalog': var c = $('#catalog'); if (c) window.scrollTo({ top: c.getBoundingClientRect().top + window.scrollY - 64, behavior: 'smooth' }); break;
       case 'search':
         var box = $('#searchBox'); box.classList.toggle('open');
-        if (box.classList.contains('open')) { $('#q').focus(); } else { $('#q').value = ''; if (S.q) { S.q = ''; if (S.view === 'home') renderCatalogParts(); } }
+        if (box.classList.contains('open')) { $('#q').focus(); } else { $('#q').value = ''; if (S.q) { S.q = ''; S.shown = CFG.pageSize; if (S.view === 'home') renderCatalogParts(); } }
         break;
       case 'size': sel.size = v; renderSheet(); haptic(); break;
       case 'color': sel.color = v; renderSheet(); haptic(); break;
@@ -597,7 +927,7 @@ svg{display:block}
   document.addEventListener('input', function (e) {
     var t = e.target;
     if (t.id === 'q') {
-      S.q = t.value;
+      S.q = t.value; S.shown = CFG.pageSize;
       if (S.view !== 'home') { S.view = 'home'; render(); } else { renderCatalogParts(); }
     }
     if (t.id === 'fName') { S.form.name = t.value; saveForm(); }
@@ -605,7 +935,7 @@ svg{display:block}
     if (t.id === 'fComment') { S.form.comment = t.value; saveForm(); }
   });
   document.addEventListener('change', function (e) {
-    if (e.target.id === 'sort') { S.sort = e.target.value; renderCatalogParts(); }
+    if (e.target.id === 'sort') { S.sort = e.target.value; S.shown = CFG.pageSize; renderCatalogParts(); }
   });
 
   /* ============================================================
@@ -623,6 +953,8 @@ svg{display:block}
       tg.BackButton.onClick(function () { if (S.sheet) closeSheet(); });
     } catch (e) {}
   }
+  if (!CFG.sheetUrl) sanitize();
+  loadProducts();
   render();
 })();
 </script>
