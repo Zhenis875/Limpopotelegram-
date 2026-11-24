@@ -215,7 +215,7 @@ svg{display:block}
     heroText: 'Товары известных брендов по сниженным ценам.',
     // Ссылка на опубликованную Google Таблицу (формат CSV).
     // Пока пусто — показывается демо-каталог ниже.
-    sheetUrl: '',
+    sheetUrl: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRY_Zzg_ip3MpjxkNRe4V20KIPOOjpEJ-hNLRd_yHkLPQ97hNve3uGMo92keeiN2l-xjmGST_CidRdy/pub?gid=1&single=true&output=csv',
     pageSize: 24                                       // сколько товаров показывать за раз
   };
 
@@ -441,7 +441,11 @@ svg{display:block}
 
   function hash(s) { var h = 0; s = String(s); for (var i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) >>> 0; return h; }
   function slug(s) { return String(s).toLowerCase().replace(/[^a-zа-яё0-9]+/g, '-').replace(/^-+|-+$/g, ''); }
-  function num(v) { var n = parseFloat(String(v == null ? '' : v).replace(/[^\d.,]/g, '').replace(',', '.')); return isFinite(n) ? Math.round(n) : 0; }
+  function num(v) {
+    var s = String(v == null ? '' : v).replace(/[^\d.,]/g, '');
+    if (/^\d{1,3}([.,]\d{3})+$/.test(s)) s = s.replace(/[.,]/g, ''); else s = s.replace(',', '.');
+    var n = parseFloat(s); return isFinite(n) ? Math.round(n) : 0;
+  }
   function listOf(v) { if (Array.isArray(v)) return v; return String(v == null ? '' : v).split(/[,;]+/).map(function (x) { return x.trim(); }).filter(Boolean); }
   function yes(v) { return /^(да|yes|y|1|true|\+|new|новинка)$/i.test(String(v == null ? '' : v).trim()); }
   function no(v) { return /^(нет|no|n|0|false|-|нет в наличии)$/i.test(String(v == null ? '' : v).trim()); }
